@@ -1,181 +1,99 @@
-# 极趣实验室 API 技能
+# 极趣实验室 OpenClaw 技能
+
+一个为极趣实验室智能墨水屏设备打造的 OpenClaw 技能，封装了官方全部 API，默认自动绑定你的个人设备，开箱即用，无需额外配置即可管理待办、推送内容到设备。
+非官方开发，仅供测试学习使用
+
+## 功能特性
+
+- 📱 **设备管理**：一键查看你账号下的所有绑定设备
+- ✅ **待办事项管理**：待办的增删改查、标记完成，默认自动绑定到你的设备
+- 🖼️ **内容推送**：支持向墨水屏设备推送文本、图片内容
+- 🔧 **可配置化**：仅需修改两个配置项即可适配任意用户的账号，无需改动业务代码
+- 📖 **清晰的文档**：附带排版好的 API 文档，方便开发调试
 
 ## 快速开始
 
-首次使用前，请在代码中配置你的 API Key 和设备 MAC 地址：
+### 1. 安装技能
 
-```javascript
-const CONFIG = {
-  API_KEY: "你的APIKey",      // 在极趣云平台获取
-  MAC: "AA:BB:CC:DD:EE:FF"    // 你的设备MAC地址
-};
+下载本项目的压缩包，解压到你的 OpenClaw 技能目录中。
+
+### 2. 配置个人信息
+
+打开 `scripts/main.py`，修改顶部的配置项，替换成你自己的信息：
+
+```python
+# ==================== 配置项 - 请根据你的个人信息修改这里 ====================
+API_KEY = "你的API Key"
+DEVICE_MAC = "你的设备MAC地址"
+# ======================================================================
 ```
 
-## API 配置
+这两个信息可以在极趣实验室的个人中心获取。
 
-| 配置项   | 值                                  | 说明             |
-| -------- | ----------------------------------- | ---------------- |
-| Base URL | `https://cloud.zectrix.com/open/v1` | 固定不变         |
-| 认证方式 | Header `X-API-Key`                  | 需要申请         |
-| API Key  | 用户自行配置                        | 在极趣云平台申请 |
+### 3. 安装依赖
 
-## 可用操作
+本技能依赖 `requests` 库来发送 API 请求，如果你还没有安装，执行：
 
-| 功能           | 说明                                      |
-| :------------- | :---------------------------------------- |
-| `getDevices`   | 获取已绑定的设备列表                      |
-| `getTodos`     | 获取待办列表（支持 status/deviceId 过滤） |
-| `createTodo`   | 创建待办事项                              |
-| `updateTodo`   | 更新待办内容                              |
-| `completeTodo` | 标记待办完成                              |
-| `deleteTodo`   | 删除待办                                  |
-| `pushText`     | 推送文本到设备显示屏                      |
-| `pushImage`    | 推送图片到设备显示屏                      |
-
-**使用示例**:
-
-- “查看我的设备有哪些”
-- “帮我创建一个待办：买牛奶”
-- “在屏幕上显示今日天气：晴”
-- “推送桌面上的test.png到设备”
-
-
-### 1. 获取设备列表
-
-```javascript
-// 先获取设备列表，找到你的设备MAC
-const devices = await apiCall('getDevices');
-// 返回: [{ deviceId: "AA:BB:CC:DD:EE:FF", alias: "我的设备", board: "bread-compact-wifi" }]
+```bash
+pip install requests
 ```
 
-### 2. 获取待办列表
+## 使用示例
 
-```javascript
-// 获取所有待办
-const todos = await apiCall('getTodos');
+### 待办事项
 
-// 过滤待完成
-const pendingTodos = await apiCall('getTodos', { status: 0 });
+```python
+# 获取你设备的待完成待办
+todos = get_todos(status=0)
 
-// 过滤指定设备
-const deviceTodos = await apiCall('getTodos', { deviceId: "AA:BB:CC:DD:EE:FF" });
+# 创建一个新的待办，自动绑定到你的设备
+todo = create_todo(
+    title="买牛奶",
+    description="买常温纯牛奶",
+    due_date="2026-03-25",
+    priority=1
+)
+
+# 标记待办完成
+complete_todo(todo['id'])
 ```
 
-### 3. 创建待办 ⚠️ 默认写入设备
+### 内容推送
 
-```javascript
-// 创建的待办会自动关联到配置的MAC设备
-const newTodo = await apiCall('createTodo', {
-  title: "买牛奶",
-  description: "",
-  dueDate: "2026-03-20",
-  dueTime: "09:00",
-  repeatType: "none",  // daily/weekly/monthly/yearly/none
-  priority: 1,         // 0=普通, 1=重要, 2=紧急
-  // deviceId 自动使用配置的 MAC 地址
-});
+```python
+# 推送天气信息到设备
+push_text(
+    text="今日天气：晴\n温度：25°C\n空气质量：优",
+    font_size=24
+)
+
+# 推送图片到设备
+push_image("/path/to/your/image.png")
 ```
 
-**注意**：创建待办时，默认会自动关联到配置的 MAC 设备，无需手动指定。
+## 项目结构
 
-### 4. 更新待办
-
-```javascript
-const updated = await apiCall('updateTodo', 1, {
-  title: "买牛奶和面包",
-  description: "新增描述",
-  dueDate: "2026-03-21",
-  priority: 2
-});
+```
+jiqu_lab_skill/
+├── README.md              # 本说明文件
+├── SKILL.md               # OpenClaw 技能定义文件
+├── scripts/
+│   └── main.py            # 业务脚本，包含所有API封装
+├── references/
+│   └── 极趣实验室API文档.md    # Markdown版API文档
 ```
 
-### 5. 标记完成/取消完成
+## 参考文档
 
-```javascript
-await apiCall('completeTodo', 1);  // 标记完成
-await apiCall('uncompleteTodo', 1); // 取消完成
-```
+完整的 API 文档可以参考极趣实验室官方文档https://cloud.zectrix.com/home/api-docs
+或查看`references/极趣实验室API文档.md`。
 
-### 6. 删除待办
+## 作者
 
-```javascript
-await apiCall('deleteTodo', 1);
-```
+**BI1VMM**
 
-### 7. 推送文本到设备显示屏
+- 个人网站：[https://bi1vmm.cn](https://bi1vmm.cn)
 
-```javascript
-const result = await apiCall('pushText', 'DC:B4:D9:22:CD:20', {
-  text: "今日天气：晴\n温度：25°C",
-  fontSize: 20,        // 12-48，默认20
-  pageId: "1"          // 1-5，可选，指定会持久化存储
-});
-// 返回: { totalPages: 1, pushedPages: 1, pageId: "1" }
-```
+## 许可证
 
-### 8. 推送图片到设备显示屏
-
-```javascript
-// 注意：需要使用 FormData 上传图片文件
-const formData = new FormData();
-formData.append('images', fileInput.files[0]);
-formData.append('dither', 'true');
-formData.append('pageId', '1');
-
-const result = await apiCall('pushImageForm', 'DC:B4:D9:22:CD:20', formData);
-```
-
-## 内部实现
-
-```javascript
-const BASE_URL = 'https://cloud.zectrix.com/open/v1';
-
-async function apiCall(endpoint, paramsOrData = {}, method = 'GET') {
-  const isGet = method === 'GET';
-  const url = new URL(`${BASE_URL}/${endpoint}`);
-  
-  const options = {
-    method,
-    headers: {
-      'X-API-Key': '你的APIKey'  // 替换为你的API Key
-    }
-  };
-
-  if (!isGet && method !== 'DELETE') {
-    options.headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(paramsOrData);
-  } else if (isGet && typeof paramsOrData === 'object' && Object.keys(paramsOrData).length > 0) {
-    Object.entries(paramsOrData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        url.searchParams.append(key, value);
-      }
-    });
-  }
-
-  const response = await fetch(url.toString(), options);
-  const result = await response.json();
-  
-  if (result.code !== 0) {
-    throw new Error(result.msg || `API Error: ${result.code}`);
-  }
-  
-  return result.data;
-}
-```
-
-## 错误处理
-
-所有API返回格式：
-
-```javascript
-{ code: 0, data: {...} }  // 成功
-{ code: 非0, msg: "错误信息" }  // 失败
-```
-
-检查 `code === 0` 确认成功。
-
-## 🔐 安全提示
-
-- **API Key** 是你的个人凭证，请勿泄露到公开场合
-- **MAC 地址** 是设备标识，通常可以公开
-- 使用完毕后请妥善保管凭证
+MIT
