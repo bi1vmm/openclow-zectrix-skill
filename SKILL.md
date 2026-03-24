@@ -2,7 +2,7 @@
 name: 极趣实验室设备管理技能
 version: 1.0.1
 description: 用于管理极趣实验室的智能墨水屏设备，支持待办事项管理、文本/图片推送至设备，默认自动绑定到你配置的设备，只需修改配置项即可适配个人账号，开箱即用。
-author: OpenClaw Community
+author: BI1VMM（https://bi1vmm.cn）
 tags: [极趣实验室, 设备管理, 待办, 墨水屏, 智能硬件]
 ---
 
